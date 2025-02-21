@@ -5,4 +5,20 @@ from django.shortcuts import redirect, render
 
 
 def home(request):
-    return render(request, "home.html")
+    return render(request, "dashboard.html")
+
+
+def entry(request):
+    return render(request, "entry.html")
+
+
+def exit(request):
+    return render(request, "exit.html")
+
+
+def users(request):
+    return render(request, "users.html")
+
+
+def plates(request):
+    return render(request, "plates.html")

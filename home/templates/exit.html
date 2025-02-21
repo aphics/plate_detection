@@ -1,0 +1,37 @@
+{% extends 'base.html' %} {% block title %}+ Entry - PLATE REG{% endblock %}
+
+{% block content %}
+<!-- Page Heading -->
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+  <h1 class="h3 mb-0 text-gray-800">Registrar Salida</h1>
+</div>
+
+<!-- Content Row -->
+<div class="row">
+  <div class="col-12">
+    <!-- Illustrations -->
+    <div class="card shadow mb-4">
+      <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">
+          Gestión de estacionamientos
+        </h6>
+      </div>
+      <div class="card-body">
+        <div class="container-fluid row justify-content-md-center">
+          <div class="custom-file col-5" style="margin: 5px">
+            <input
+              type="file"
+              class="custom-file-input"
+              id="customFileLang"
+              lang="es"
+            />
+            <label class="custom-file-label" for="customFileLang"
+              >Imagen de cámara de salida</label
+            >
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
