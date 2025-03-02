@@ -18,10 +18,10 @@ class CarHistory(models.Model):
     vehicle_type = models.CharField(
         max_length=3, choices=VehicleOptions.choices, default=VehicleOptions.CAR
     )
-    created_date = models.DateTimeField(timezone.now)
-    entry_date = models.DateTimeField()
-    exit_date = models.DateTimeField()
-    price = models.FloatField()
+    created_date = models.DateTimeField(timezone.now())
+    entry_date = models.DateTimeField(null=True, blank=True)
+    exit_date = models.DateTimeField(null=True, blank=True)
+    price = models.FloatField(null=True, blank=True)
     
 
     def __str__(self):
