@@ -18,3 +18,4 @@ backend_test/convertir_imagen.ipynb
 backend_test/detecta_placas.ipynb
 backend_test/main_.py
 backend_test/util.py
+stack.env
