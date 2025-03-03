@@ -4,6 +4,7 @@ services:
   web:
     build: .
     container_name: django_plate_detection
+    working_dir: /app
     #ports:
     #  - "8000:8000"
     volumes:
