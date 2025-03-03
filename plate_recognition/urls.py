@@ -22,11 +22,12 @@ from django.urls import include, path
 
 from home import views
 
+
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("", views.home, name="home"),
     path("entry", views.entry, name="entry"),
     path("exit", views.exit, name="exit"),
-    path("users", views.users, name="users"),
-    path("plates", views.plates, name="plates"),
+    path("login/", views.login_view, name="login"),
+    path("logout/", views.logout_view, name="logout"),
 ]
