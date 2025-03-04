@@ -9,3 +9,5 @@ services:
     #  - "8000:8000"
     environment:
       - DEBUG=True
+      - ALLOWED_HOSTS=example.com
+      - CSRF_TRUSTED_ORIGINS=https://example.com
