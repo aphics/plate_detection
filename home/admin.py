@@ -10,12 +10,12 @@ class CarHistoryAdmin(admin.ModelAdmin):
         "vehicle_plate",
         "vehicle_color",
         "vehicle_type",
+        "created_date",
         "entry_date",
         "exit_date",
         "usage_time",
         "price",
     )
-    # list_filter = ("vehicle_plate", "vehicle_color", "vehicle_type")
     list_filter = ("vehicle_color", "vehicle_type")
     search_fields = ("vehicle_plate",)
     ordering = ("-entry_date",)

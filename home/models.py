@@ -18,7 +18,7 @@ class CarHistory(models.Model):
     vehicle_type = models.CharField(
         max_length=3, choices=VehicleOptions.choices, default=VehicleOptions.CAR
     )
-    created_date = models.DateTimeField(timezone.now())
+    created_date = models.DateTimeField(null=True, blank=True)
     entry_date = models.DateTimeField(null=True, blank=True)
     image_entry_vehicle = models.ImageField(
         upload_to="images_entry_vehicles/", null=True, blank=True
