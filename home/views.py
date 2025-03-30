@@ -3,6 +3,8 @@ import os
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
+from django.db.models import Sum
 from django.shortcuts import redirect, render
 from django.utils import timezone
 
@@ -12,14 +14,64 @@ from .plate_recognition import LicencePlateRecognition
 
 @login_required
 def home(request):
-    return render(request, "dashboard.html")
+    today = timezone.now().date()
+    fecha_inicio = request.GET.get("fecha_inicio", today.replace(day=1).isoformat())
+    fecha_fin = request.GET.get("fecha_fin", today.isoformat())
+
+    monto_mensual = CarHistory.objects.filter(
+        created_date__year=today.year,
+        created_date__month=today.month,
+    ).aggregate(Sum("price"))["price__sum"]
+    monto_anual = CarHistory.objects.filter(
+        created_date__year=today.year,
+    ).aggregate(
+        Sum("price")
+    )["price__sum"]
+
+    autos_estacionados = CarHistory.objects.filter(
+        exit_date__isnull=True,
+    ).count()
+    capacidad_total = 70
+    capacidad_ocupada = f"{round(autos_estacionados / capacidad_total * 100, 2)}"
+
+    if fecha_inicio and fecha_fin:
+        # Filtrar rango de fechas
+        registros = CarHistory.objects.filter(
+            created_date__range=[fecha_inicio, fecha_fin],
+        )
+        monto_filtro = registros.aggregate(Sum("price"))["price__sum"]
+        autos_filtro = registros.count()
+
+        # Paginacion
+        paginator = Paginator(registros, 5)
+        page_number = request.GET.get("page")
+        page_obj = paginator.get_page(page_number)
+    else:
+        monto_filtro = 0
+        autos_filtro = 0
+        page_obj = None
+
+    return render(
+        request,
+        "dashboard.html",
+        {
+            "monto_mensual": f"$ {monto_mensual:,.2f}",
+            "monto_anual": f"$ {monto_anual:,.2f}",
+            "autos_estacionados": autos_estacionados,
+            "capacidad_ocupada": capacidad_ocupada,
+            "monto_filtro": monto_filtro,
+            "autos_filtro": autos_filtro,
+            "page_obj": page_obj,
+            "fecha_inicio": fecha_inicio,
+            "fecha_fin": fecha_fin,
+        },
+    )
 
 
 @login_required
 def entry(request):
     if request.method == "POST" and request.FILES.get("entry_image"):
         image_file = request.FILES["entry_image"]
-        print(image_file)
 
         # Guardar imagen en temporal
         filename = f"entry_image.jpg"
@@ -81,7 +133,6 @@ def entry(request):
 def exit(request):
     if request.method == "POST" and request.FILES.get("exit_image"):
         image_file = request.FILES["exit_image"]
-        print(image_file)
 
         # Guardar imagen en temporal
         filename = f"exit_image.jpg"
