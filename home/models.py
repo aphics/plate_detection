@@ -38,15 +38,17 @@ class CarHistory(models.Model):
 
     def calculate_usage_time(self):
         if self.entry_date and self.exit_date:
-            self.duracion = self.exit_date - self.entry_date
+            self.usage_time = self.exit_date - self.entry_date
             self.save()
 
-    @property
     def calculate_price(self, fee):
-        if self.duracion:
-            usage_time_hours = self.duracion.total_seconds() / 3600
-            return round(usage_time_hours * fee, 2)
-        return 0
+        self.calculate_usage_time()
+        if self.usage_time:
+            usage_time_hours = self.usage_time.total_seconds() / 3600
+            self.price = round(usage_time_hours * fee, 0)
+        else:
+            self.price = 0
+        self.save()
 
     def __str__(self):
         return self.vehicle_plate
