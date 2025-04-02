@@ -22,6 +22,7 @@ def home(request):
         created_date__year=today.year,
         created_date__month=today.month,
     ).aggregate(Sum("price"))["price__sum"]
+
     monto_anual = CarHistory.objects.filter(
         created_date__year=today.year,
     ).aggregate(
@@ -55,7 +56,7 @@ def home(request):
         request,
         "dashboard.html",
         {
-            "monto_mensual": f"$ {monto_mensual:,.2f}",
+            "monto_mensual": f"$ {monto_mensual if monto_mensual is not None else 0:,.2f}",
             "monto_anual": f"$ {monto_anual:,.2f}",
             "autos_estacionados": autos_estacionados,
             "capacidad_ocupada": capacidad_ocupada,
