@@ -1,9 +1,35 @@
-{% extends 'base.html' %} {% block title %}Entrada - {{ APP_TITLE }}{% endblock %}
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Entrada - {{ APP_TITLE }}{% endblock %}
+
+{% block inhead %}
+<link href="{% static 'css/drop-area.css' %}" rel="stylesheet">
+{% endblock %}
+
 
 {% block content %}
 <!-- Page Heading -->
 <div class="d-sm-flex align-items-center justify-content-between mb-4">
   <h1 class="h3 mb-0 text-gray-800">Registrar Entrada</h1>
+</div>
+
+<div class="row">
+  <div class="col-12">
+    {% if alerta == 'duplicado' %}
+    <div id="alertGestion" class="alert alert-info" role="alert">
+      El auto ya se encuentra en el estacionamiento. Verificar existencia.
+    </div>
+    {% elif alerta == 'exito' %}
+    <div id="alertGestion" class="alert alert-success" role="alert">
+      Vehiculo registrado exitosamente.
+    </div>
+    {% elif alerta == 'no_vehiculo' %}
+    <div id="alertGestion" class="alert alert-danger" role="alert">
+      No es un vehiculo.
+    </div>
+    {% endif %}
+  </div>
 </div>
 
 <!-- Content Row -->
@@ -17,84 +43,52 @@
         </h6>
       </div>
       <div class="card-body">
-        <div class="container-fluid row justify-content-md-center">
-          <div class="custom-file col-5" style="margin: 5px">
-            <form id='registro_entrada' method="post" enctype="multipart/form-data" action="{% url 'entry' %}">
-              {% csrf_token %}
-              <input type="file" class="custom-file-input" id="input_entry" lang="es" name="entry_image"
-                accept="image/*" />
-              <button type="submit" class="btn btn-primary col-5" style="margin: 5px;">Procesar imagen
-              </button>
-            </form>
-            <label class="custom-file-label" for="input_entry">Imagen de cámara de acceso</label>
+        <div class="container">
 
-            <div id="preview_container_entry" style="margin-top: 20px; display: none;">
-              <h4>Vista previa</h4>
-              <img id="preview_image_entry" src="" alt="Vista previa" width="300">
+          <form id='formGestion' method="post" enctype="multipart/form-data" onsubmit="loadingImage()">
+            <div class="row">
+              <div class="col-6">
+                {% csrf_token %}
+                <div class="form-group">
+                  <label for="imageUpload">Imagen de cámara de acceso:</label>
+                  <div id="drop-area" class="form-control">
+                    Arrastra y suelta la imagen aquí
+                  </div>
+                  <input type="file" id="imageUpload" class="d-none" name="entry_image" accept="image/*" required>
+                  <small id="fileHelp" class="form-text text-muted">Suelta la imagen o haz clic para seleccionarla.</small>
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="form-group">
+                  <label for="preview">Vista previa de la imagen:</label>
+                  <div class="preview-container bg-gray-700">
+                    {% if image_url %}
+                    <img id="preview" src="{{ image_url }}" alt="Vista previa de la imagen">
+                    {% else %}
+                    <img id="preview" src="" style="display: none;" alt="Vista previa de la imagen">
+                    {% endif %}
+                  </div>
+                  {% if vehicle %}
+                  <div id="vehicleInfo">
+                    <span class="badge badge-success">Placa: {{ vehicle.vehicle_plate }}</span>
+                    <span class="badge badge-success">Color: {{ vehicle.vehicle_color }}</span>
+                    <span class="badge badge-success">Tipo: {{ vehicle.vehicle_type }}</span>
+                  </div>
+                  {% endif %}
+                </div>
+              </div>
+              <div class="col-12">
+                <button id="btnProcesarImagen" type="submit" class="btn btn-primary mt-3 mb-5 w-100" disabled>Procesar imagen</button>
+              </div>
             </div>
+          </form>
 
-            {% if image_url %}
-            <h4 id="Titulo imagen entry">Imagen procesada</h4>
-            <img src="{{ image_url }}" alt="Imagen procesada entry" width="300">
-            {% endif %}
-            {% if alerta == 'duplicado' %}
-            <div id='alerta_entry' style="color: red;">Alerta: El auto ya se encuentra en el estacionamiento. Verificar
-              existencia</div>
-            {% elif alerta == 'exito' %}
-            <div id='alerta_entry' style="color: green;">Vehiculo registrado exitosamente.</div>
-            {% elif alerta == 'no_vehiculo' %}
-            <div id='alerta_entry' style="color: red;">No es un vehiculo.</div>
-            {% endif %}
-
-            {% if vehicle %}
-            <ul id="vehicle_info_entry" class="list-group list-group-flush">
-              <li>
-                Placa: {{ vehicle.vehicle_plate }}
-              </li>
-              <li>
-                Color: {{ vehicle.vehicle_color }}
-              </li>
-              <li>
-                Tipo: {{ vehicle.vehicle_type }}
-              </li>
-            </ul>
-            {% endif %}
-
-            <script>
-              const imageInput = document.getElementById('input_entry');
-              const previewContainer = document.getElementById('preview_container_entry');
-              const previewImage = document.getElementById('preview_image_entry');
-
-              const processedImage = document.querySelector('img[alt="Imagen procesada entry"]');
-              const titleImage = document.getElementById('Titulo imagen entry');
-              const vehicleInfo = document.getElementById('vehicle_info_entry');
-              const alerta = document.getElementById('alerta_entry');
-
-              imageInput.addEventListener('change', function () {
-                const file = this.files[0];
-                if (processedImage) processedImage.remove();
-                if (titleImage) titleImage.remove();
-                if (vehicleInfo) vehicleInfo.remove();
-                if (alerta) alerta.remove();
-
-                if (file) {
-                  const reader = new FileReader();
-                  reader.onload = function (e) {
-                    previewImage.src = e.target.result;
-                    previewContainer.style.display = 'block';
-                  };
-                  reader.readAsDataURL(file);
-                }
-                else {
-                  previewContainer.style.display = 'none';
-                  previewImage.src = '';
-                }
-              });
-            </script>
-          </div>
         </div>
       </div>
     </div>
   </div>
 </div>
+
+<script src="{% static 'js/drop-area.js' %}"></script>
+
 {% endblock %}

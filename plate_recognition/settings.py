@@ -137,4 +137,4 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 LOGIN_URL = "/login"
 
-APP_TITLE = os.getenv("APP_TITLE", "")
+APP_TITLE = os.getenv("APP_TITLE", "PlacaID")
