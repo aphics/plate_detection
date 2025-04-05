@@ -121,12 +121,14 @@ class LicencePlateRecognition:
         predominant_color = kmeans.cluster_centers_[kmeans.labels_[0]].astype(int)
         min_dist = float("inf")
         detected_color = "No detectado"
+        detected_rgb = ""
         for color, rgb in color_labels.items():
             dist = np.linalg.norm(predominant_color - np.array(rgb))
             if dist < min_dist:
                 min_dist = dist
                 detected_color = color
-        return detected_color
+                detected_rgb = rgb
+        return detected_color, detected_rgb
 
     def show_image(self, image):
         image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
@@ -160,6 +162,7 @@ class LicencePlateRecognition:
         x1_biggest, x2_biggest = 0, image.shape[0]
         y1_biggest, y2_biggest = 0, image.shape[1]
         color_biggest_vehicle_box = "No detectado"
+        rgb_biggest_vehicle_box = "gray"
         text_plate_biggest_vechicle_box = "No detectada"
         cls_biggest_vechicle_box = "No detectado"
         image_plate = []
@@ -173,7 +176,7 @@ class LicencePlateRecognition:
                     if cls_object in [2, 3, 5, 7]:
                         plate_text, image_plate = self.detect_plate(crop)
                         # plate_text, _ = self.extract_text(crop)
-                        detected_color = self.detect_color(image)
+                        detected_color, detected_rgb = self.detect_color(image)
                         cls_vehicle = self.model_vechicle_detection.names.get(
                             cls_object
                         )
@@ -182,6 +185,7 @@ class LicencePlateRecognition:
                         area_biggest_vehicle_box = area
                         text_plate_biggest_vechicle_box = plate_text
                         color_biggest_vehicle_box = detected_color
+                        rgb_biggest_vehicle_box = detected_rgb
                         cls_biggest_vechicle_box = cls_vehicle
         cv2.rectangle(
             image, (x1_biggest, y1_biggest), (x2_biggest, y2_biggest), (0, 255, 0), 2
@@ -204,5 +208,6 @@ class LicencePlateRecognition:
         return (
             text_plate_biggest_vechicle_box,
             color_biggest_vehicle_box,
+            rgb_biggest_vehicle_box,
             cls_biggest_vechicle_box,
         )

@@ -7,6 +7,7 @@ from django.core.paginator import Paginator
 from django.db.models import Sum
 from django.shortcuts import redirect, render
 from django.utils import timezone
+from datetime import datetime, timedelta
 
 from .models import CarHistory
 from .plate_recognition import LicencePlateRecognition
@@ -15,8 +16,11 @@ from .plate_recognition import LicencePlateRecognition
 @login_required
 def home(request):
     today = timezone.now().date()
-    fecha_inicio = request.GET.get("fecha_inicio", today.replace(day=1).isoformat())
-    fecha_fin = request.GET.get("fecha_fin", today.isoformat())
+    fecha_inicio_str = request.GET.get("fecha_inicio", today.replace(day=1).isoformat())
+    fecha_fin_str = request.GET.get("fecha_fin", today.isoformat())
+
+    fecha_inicio_dt = datetime.strptime(fecha_inicio_str, "%Y-%m-%d")
+    fecha_fin_dt = datetime.strptime(fecha_fin_str, "%Y-%m-%d")
 
     monto_mensual = CarHistory.objects.filter(
         created_date__year=today.year,
@@ -35,22 +39,12 @@ def home(request):
     capacidad_total = 70
     capacidad_ocupada = f"{round(autos_estacionados / capacidad_total * 100, 2)}"
 
-    if fecha_inicio and fecha_fin:
-        # Filtrar rango de fechas
-        registros = CarHistory.objects.filter(
-            created_date__range=[fecha_inicio, fecha_fin],
-        )
-        monto_filtro = registros.aggregate(Sum("price"))["price__sum"]
-        autos_filtro = registros.count()
-
-        # Paginacion
-        paginator = Paginator(registros, 5)
-        page_number = request.GET.get("page")
-        page_obj = paginator.get_page(page_number)
-    else:
-        monto_filtro = 0
-        autos_filtro = 0
-        page_obj = None
+    # Filtrar rango de fechas
+    registros = CarHistory.objects.filter(
+        created_date__gte=fecha_inicio_dt,
+        created_date__lte=fecha_fin_dt + timedelta(days=1) - timedelta(microseconds=1),
+    )
+    monto_filtro = registros.aggregate(Sum("price"))["price__sum"]
 
     return render(
         request,
@@ -61,10 +55,9 @@ def home(request):
             "autos_estacionados": autos_estacionados,
             "capacidad_ocupada": capacidad_ocupada,
             "monto_filtro": monto_filtro,
-            "autos_filtro": autos_filtro,
-            "page_obj": page_obj,
-            "fecha_inicio": fecha_inicio,
-            "fecha_fin": fecha_fin,
+            "registros": registros,
+            "fecha_inicio": fecha_inicio_str,
+            "fecha_fin": fecha_fin_str,
         },
     )
 
@@ -85,7 +78,7 @@ def entry(request):
 
         # Procesar imagen
         lpr = LicencePlateRecognition()
-        text_plate, detected_color, cls_vehicle = lpr.process_image(
+        text_plate, detected_color, detected_rgb, cls_vehicle = lpr.process_image(
             image_path=save_path, type_process="entry"
         )
         if text_plate == "No detectada":
@@ -118,6 +111,7 @@ def entry(request):
         vehicle = CarHistory.objects.create(
             vehicle_plate=text_plate,
             vehicle_color=detected_color,
+            vehicle_rgb=detected_rgb,
             vehicle_type=cls_vehicle,
             created_date=timezone.now(),
             entry_date=timezone.now(),
@@ -146,7 +140,7 @@ def exit(request):
 
         # Procesar imagen
         lpr = LicencePlateRecognition()
-        text_plate, detected_color, cls_vehicle = lpr.process_image(
+        text_plate, detected_color, detected_rgb, cls_vehicle = lpr.process_image(
             image_path=save_path, type_process="exit"
         )
         if text_plate == "No detectada":

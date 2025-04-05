@@ -9,6 +9,7 @@ class CarHistoryAdmin(admin.ModelAdmin):
     list_display = (
         "vehicle_plate",
         "vehicle_color",
+        "vehicle_rgb",
         "vehicle_type",
         "created_date",
         "entry_date",

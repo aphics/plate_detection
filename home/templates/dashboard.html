@@ -1,8 +1,14 @@
 {% extends 'base.html' %}
 
 {% load static %}
+{% load humanize %}
+{% load mis_filtros %}
 
 {% block title %}Dashboard - {{ APP_TITLE }}{%endblock %}
+
+{% block inhead %}
+<link href="{% static 'css/dataTables.bootstrap4.min.css' %}" rel="stylesheet">
+{% endblock %}
 
 {% block content %}
 <!-- Page Heading -->
@@ -117,61 +123,38 @@
         <h6 class="m-0 font-weight-bold text-primary">Base de datos</h6>
       </div>
       <div class="card-body">
+        <!-- Filtros -->
         <form method="get" class="mb-3">
           <label>Desde:
             <input type="date" name="fecha_inicio" value='{{ fecha_inicio }}' class="form-control" /></label>
           <label>Hasta:
             <input type="date" name="fecha_fin" value="{{ fecha_fin }}" class="form-control" /></label>
-          <button type="submit" class="btn btn-primary col-3">Buscar</button>
+          <button type="submit" class="btn btn-primary">Filtrar</button>
         </form>
-        <div class="card-body">
-          <label class="form-control col-5">Ganancias: $ {{ monto_filtro }}</label>
-          <label class="form-control col-5">Total autos: {{ autos_filtro }}</label>
-        </div>
 
-        <!-- Paginacion -->
-        <nav>
-          <ul class="pagination">
-            {% if page_obj.has_previous %}
-            <li class="page-item">
-              <a class="page-link" href="?page={{ page_obj.previous_page_number }}&fecha_inicio={{ fecha_inicio }}&fecha_fin={{ fecha_fin }}">Anterior</a>
-            </li>
-            {% endif %}
-
-            <li class="page-item disable">
-              <span class="page-link">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
-            </li>
-
-            {% if page_obj.has_next %}
-            <li class="page-item">
-              <a class="page-link" href="?page={{ page_obj.next_page_number }}&fecha_inicio={{ fecha_inicio }}&fecha_fin={{ fecha_fin }}">Siguiente</a>
-            </li>
-            {% endif %}
-          </ul>
-        </nav>
         <!-- Tabla de registros -->
-        <table class="table table-striped table-bordered">
+        <table id="dataTable" class="table table-striped table-bordered">
           <thead class="thead-dark">
             <tr>
               <th>Placa</th>
               <th>Color</th>
               <th>Tipo</th>
-              <th>Fecha entrada</th>
-              <th>Fecha salida</th>
+              <th>Entrada</th>
+              <th>Salida</th>
               <th>Tiempo de uso</th>
               <th>Monto</th>
             </tr>
           </thead>
           <tbody>
-            {% for vehiculo in page_obj %}
+            {% for vehiculo in registros %}
             <tr>
               <td>{{ vehiculo.vehicle_plate }}</td>
               <td>{{ vehiculo.vehicle_color }}</td>
               <td>{{ vehiculo.vehicle_type }}</td>
               <td>{{ vehiculo.entry_date }}</td>
-              <td>{{ vehiculo.exit_date }}</td>
-              <td>{{ vehiculo.usage_time }}</td>
-              <td>{{ vehiculo.price }}</td>
+              <td>{{ vehiculo.exit_date|default_if_none:'' }}</td>
+              <td>{{ vehiculo.usage_time|format_time }}</td>
+              <td>${{ vehiculo.price|default_if_none:0|floatformat:2|intcomma }}</td>
             </tr>
             {% empty %}
             <tr>
@@ -180,6 +163,10 @@
             {% endfor %}
           </tbody>
         </table>
+
+        <div>
+          Monto Total: ${{ monto_filtro|default_if_none:0|floatformat:2|intcomma }}
+        </div>
 
       </div>
     </div>
@@ -204,11 +191,20 @@
     </div>
   </div>
 </div>
+{% endblock %}
 
-<!-- Page level plugins -->
+{% block endofbody %}
+<!-- Chart.js -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.bundle.js" integrity="sha512-zO8oeHCxetPn1Hd9PdDleg5Tw1bAaP0YmNvPY8CwcRyUk7d7/+nyElmFrB6f7vg4f7Fv4sui1mcep8RIEShczg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-
-<!-- Page level custom script -->
 <script src="{% static 'js/demo/chart-area-demo.js' %}"></script>
 
+<!-- DataTables -->
+<script src="{% static 'js/datatables/jquery.dataTables.min.js' %}"></script>
+<script src="{% static 'js/datatables/dataTables.bootstrap4.min.js' %}"></script>
+<script>
+    // Call the dataTables jQuery plugin
+    $(document).ready(function () {
+        $('#dataTable').DataTable();
+    });
+</script>
 {% endblock %}

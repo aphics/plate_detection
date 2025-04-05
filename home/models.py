@@ -15,6 +15,7 @@ class CarHistory(models.Model):
 
     vehicle_plate = models.CharField(max_length=20)
     vehicle_color = models.CharField(max_length=20)
+    vehicle_rgb = models.CharField(max_length=10)
     vehicle_type = models.CharField(
         max_length=3, choices=VehicleOptions.choices, default=VehicleOptions.CAR
     )
