@@ -137,7 +137,7 @@ LOGIN_URL = "/login"
 DEBUG = os.environ.get("APP_TITLE", False)
 
 APP_TITLE = os.environ.get("APP_TITLE", "PlacaID")
-ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "127.0.0.1").split("")
+ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "127.0.0.1").split()
 CSRF_TRUSTED_ORIGINS = os.environ.get(
     "CSRF_TRUSTED_ORIGINS", "http://127.0.0.1:8000"
 ).split()
