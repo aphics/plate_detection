@@ -71,8 +71,8 @@
                   {% if vehicle %}
                   <div id="vehicleInfo">
                     <span class="badge badge-success">Placa: {{ vehicle.vehicle_plate }}</span>
-                    <span class="badge badge-success">Color: {{ vehicle.vehicle_color }}</span>
-                    <span class="badge badge-success">Tipo: {{ vehicle.vehicle_type }}</span>
+                    <span class="badge badge-success">Color AVG: {{ vehicle.vehicle_color }}</span>
+                    <span class="badge badge-success">Tipo: {{ vehicle.get_vehicle_type_display }}</span>
                   </div>
                   {% endif %}
                 </div>

@@ -8,6 +8,7 @@ from django.db.models import Sum
 from django.shortcuts import redirect, render
 from django.utils import timezone
 from datetime import datetime, timedelta
+from collections import Counter
 
 from .models import CarHistory
 from .plate_recognition import LicencePlateRecognition
@@ -46,6 +47,19 @@ def home(request):
     )
     monto_filtro = registros.aggregate(Sum("price"))["price__sum"]
 
+    # Obtener registros filtrados por fecha
+    registros = CarHistory.objects.filter(
+        created_date__gte=fecha_inicio_dt,
+        created_date__lte=fecha_fin_dt + timedelta(days=1) - timedelta(microseconds=1),
+    )
+    # Contar registros por día
+    conteo_por_dia = Counter(
+        r.created_date.date().strftime("%Y-%m-%d") for r in registros
+    )
+    # Obtener listas ordenadas por fecha
+    fechas_graph = sorted(conteo_por_dia.keys())
+    totales_graph = [conteo_por_dia[fecha] for fecha in fechas_graph]
+
     return render(
         request,
         "dashboard.html",
@@ -58,6 +72,9 @@ def home(request):
             "registros": registros,
             "fecha_inicio": fecha_inicio_str,
             "fecha_fin": fecha_fin_str,
+            "fee": CarHistory.current_fee,
+            "fechas_graph": fechas_graph,
+            "totales_graph": totales_graph,
         },
     )
 
@@ -115,6 +132,7 @@ def entry(request):
             vehicle_type=cls_vehicle,
             created_date=timezone.now(),
             entry_date=timezone.now(),
+            fee=CarHistory.current_fee,
         )
         return render(
             request,
@@ -163,8 +181,8 @@ def exit(request):
         if existing_vehicle.exists():
             vehicle = existing_vehicle[0]
             vehicle.exit_date = timezone.now()
-            vehicle.calculate_usage_time()
-            vehicle.calculate_price(fee=42)
+            vehicle.usage_time = vehicle.get_usage_time()
+            vehicle.price = vehicle.get_price()
 
             vehicle.save()
             return render(

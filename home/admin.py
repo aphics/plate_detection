@@ -16,6 +16,7 @@ class CarHistoryAdmin(admin.ModelAdmin):
         "exit_date",
         "usage_time",
         "price",
+        "fee",
     )
     list_filter = ("vehicle_color", "vehicle_type")
     search_fields = ("vehicle_plate",)

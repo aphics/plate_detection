@@ -7,8 +7,17 @@ register = template.Library()
 def format_time(value):
     try:
         total_seconds = int(value.total_seconds())
-        horas = total_seconds // 3600
+        dias = total_seconds // 86400  # 86400 segundos en un día
+        horas = (total_seconds % 86400) // 3600
         minutos = (total_seconds % 3600) // 60
-        return f"{horas}h {minutos}m"
+
+        partes = []
+        if dias > 0:
+            partes.append(f"{dias}d")
+        if horas > 0 or dias > 0:
+            partes.append(f"{horas}h")
+        partes.append(f"{minutos}m")
+
+        return " ".join(partes)
     except Exception:
         return ""
