@@ -3,7 +3,6 @@ import os
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from django.core.paginator import Paginator
 from django.db.models import Sum
 from django.shortcuts import redirect, render
 from django.utils import timezone
