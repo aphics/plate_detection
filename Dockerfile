@@ -1,16 +1,31 @@
-FROM python:3.11.4-alpine3.18
+# Dockerfile - Python 3.11 Slim + matplotlib + gmpy2
+FROM python:3.11-slim
 
-# Instala dependencias necesarias
-RUN apk add --no-cache git
+# Instalar dependencias necesarias
+RUN apt-get update && apt-get install -y \
+	build-essential \
+	python3-dev \
+	libffi-dev \
+	libfreetype6-dev \
+	libpng-dev \
+	libopenblas-dev \
+	libgmp-dev \
+	libmpfr-dev \
+	libmpc-dev \
+	libgl1 \
+	libglib2.0-0 \
+	gfortran \
+	git \
+	&& rm -rf /var/lib/apt/lists/*
 
-# Define el directorio de trabajo dentro del contenedor
+# Establecer directorio de trabajo
 WORKDIR /app
 
 # Clona el repositorio en el contenedor
 RUN git clone https://github.com/aphics/plate_detection.git /app
 
-# Instala las dependencias del proyecto
-RUN pip install --upgrade pip
+# Instalar dependencias de Python
+RUN pip install --no-cache-dir --upgrade pip setuptools wheel
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Expone el puerto de Django
